@@ -20,7 +20,7 @@
 * 2개의 데이터프레임에 대해 각 intersection, diff, union 연산 수행 구현
     * intersection(교집합)
         - 하나 이상의 key column 조건 만족
-            ~~~
+            ~~~python
             for key_column in key_columns:
                 df1_set, df2_set = set(df1[key_column]), set(df2[key_column])
                 if key_column == key_columns[0]:
@@ -29,7 +29,7 @@
                     inter_df = pd.concat([inter_df, df1[df1[key_column].isin(df1_set&df2_set)]], ignore_index=True).drop_duplicates()
             ~~~
         - 모든 key column 조건 만족
-            ~~~
+            ~~~python
             for key_column in key_columns:
                 df1_set, df2_set = set(df1[key_column]), set(df2[key_column])
                 df1 = df1[df1[key_column].isin(df1_set&df2_set)]
@@ -38,7 +38,7 @@
             ~~~
     * diff(차집합)
         - 하나 이상의 key column 조건 만족
-            ~~~
+            ~~~python
             for key_column in key_columns:
                 df1_set, df2_set = set(df1[key_column]), set(df2[key_column])
                 df1 = df1[df1[key_column].isin(df1_set-df2_set)]
@@ -46,7 +46,7 @@
             diff_df = df1
             ~~~
         - 모든 key column 조건 만족
-            ~~~
+            ~~~python
             for key_column in key_columns:
                 df1_set, df2_set = set(df1[key_column]), set(df2[key_column])
                 if key_column == key_columns[0]:
@@ -56,11 +56,11 @@
             ~~~
     * union(합집합)
         - 하나 이상의 key column 조건 만족
-            ~~~
+            ~~~python
             union_df = pd.concat([df1, df2]).drop_duplicates(subset=key_columns)
             ~~~
         - 모든 key column 조건 만족
-            ~~~
+            ~~~python
             union_df = pd.concat([df1, df2])
             for key_column in key_columns:
                 union_df = union_df.drop_duplicates(subset=[key_column])            
@@ -69,3 +69,4 @@
     * main함수에 있는 코드 추가 검증 후 모듈화
     * 3이상의 input에 대한 처리
 
+---
