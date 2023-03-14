@@ -37,12 +37,27 @@
             inter_df = df1
             ~~~
     * diff(차집합)
+        - 하나 이상의 key column 조건 만족
+            ~~~
+            for key_column in key_columns:
+                df1_set, df2_set = set(df1[key_column]), set(df2[key_column])
+                df1 = df1[df1[key_column].isin(df1_set-df2_set)]
+                df2 = df2[df2[key_column].isin(df2_set-df1_set)]
+            diff_df = df1
+            ~~~
+        - 모든 key column 조건 만족
+            ~~~
+            for key_column in key_columns:
+                df1_set, df2_set = set(df1[key_column]), set(df2[key_column])
+                if key_column == key_columns[0]:
+                    diff_df = df1[df1[key_column].isin(df1_set-df2_set)]
+                else:
+                    diff_df = pd.concat([diff_df, df1[df1[key_column].isin(df1_set-df2_set)]]).drop_duplicates()
+            ~~~
     * union(합집합)
         - 하나 이상의 key column 조건 만족
             ~~~
-            union_df = pd.concat([df1, df2])
-            union_df = union_df.drop_duplicates(subset=key_columns)
-
+            union_df = pd.concat([df1, df2]).drop_duplicates(subset=key_columns)
             ~~~
         - 모든 key column 조건 만족
             ~~~
