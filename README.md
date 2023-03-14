@@ -65,8 +65,10 @@
             for key_column in key_columns:
                 union_df = union_df.drop_duplicates(subset=[key_column])            
             ~~~
-* 내일 할 일
+* 고민사항 및 내일 할 일
+    * operation은 한 가지만 입력 가능하도록 예외처리 필요
     * main함수에 있는 코드 추가 검증 후 모듈화
+        * 변수, 함수명 등에 대한 작명법 통일 필요 -> 해당 부분 추가 정리할 것
     * 3이상의 input에 대한 처리
 
 ---
