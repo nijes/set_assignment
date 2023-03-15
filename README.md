@@ -72,3 +72,40 @@
     * 3이상의 input에 대한 처리
 
 ---
+
+## 2023.03.15
+* 기본 구상
+    * setoperator.py 
+        - PandasOperator, DaskOperator, PolarsOperator 각각 클래스 구현
+        - 각 클래스에서 __call__ 함수를 통해 각 opertion(intersection, diff, union) 결과 dataframe 반환
+        - 함수 인자\) DataFrame(iterable), keycolumn(iterable), for_any_key_columns(bool)
+        - 함수 결과\) DataFrame
+* dataframe 연산 방식 고민
+    1. outer merge -> merged dataframe을 각 조건(both, left_only, right_only)에 따라 필터링 -> 필요한 column만 추출
+    2. key_column 값을 set로 만들어 조건 생성 -> 원본 dataframe을 각 조건에 따라 필터링(column 값이 해당 조건에 포함되는지) -> key column에 대해 반복문 수행
+* 파일 입력 / 파일 저장 별도 구현
+    * csv, xlsx
+    * tsv 
+        - csv 파일과 비슷하지만 ',' 대신 Tab으로 컬럼을 분리하는 파일포맷
+    * jsonl 
+        - 각 라인이 json객체로 이루어진 구조화된 데이터 형식
+        - UTF-8 인코딩 + 각 행이 json 형식 + 각 행이 \n으로 구분
+        - 참고 https://jsonlines.org/
+        - jsonl to list
+            ~~~python
+            import json
+            def load_jsonl(input_path) -> list:
+                data = []
+                with open(input_path, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        data.append(json.loads(line.rstrip('\n|\r')))
+                return data
+            ~~~
+* 내일 할 일
+    * getArguments, readFiles, saveFiles 정리 후 이동 -> 외부에서 import하는 형태로
+        * xlsx 외의 형식에 대해 sample 만들어서 잘 작동하는지 확인
+        * pandas 외의 dataframe framework에서는 방식 다른 점 고려
+        * 추후 파일 형식 추가 용이하도록
+    * dataframe 연산 방식에 대해 좀 더 고민해보기
+
+---
