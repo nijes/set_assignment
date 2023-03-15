@@ -8,7 +8,7 @@ class PandasOperator():
     pdoperator(operation=intersection)
     > union_dataframe
     """
-    def __init__(self, df_list:list, key_columns: list, for_any: bool):
+    def __init__(self, df_list:list[object], key_columns:list[str], for_any:bool):
         self.df_list = df_list
         self.key_columns = key_columns
         self.for_any = for_any
