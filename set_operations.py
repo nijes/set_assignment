@@ -25,17 +25,10 @@ def get_arguments():
 
 
 def main(df_list, operation, key_columns, for_any):
+    pdoperator = PandasOperator(df_list, key_columns, for_any)
+    return pdoperator(operation)
 
-    pdOperator = PandasOperator()
 
-    if operation == 'intersection':
-        return pdOperator.intersection(df_list, key_columns=key_columns, for_any=for_any)
-    elif operation == 'diff':
-        return pdOperator.diff(df_list, key_columns=key_columns, for_any=for_any)
-    elif operation == 'union':
-        return pdOperator.union(df_list, key_columns=key_columns, for_any=for_any)
-    
-    
 def readFiles(project_dir, input_files):
     return [ pd.read_excel(project_dir + '/' + file) for file in input_files ]
 
@@ -50,7 +43,7 @@ if __name__ == "__main__":
     project_dir, input_files, output_file, operation, key_columns, for_any = get_arguments()
 
     result = main( readFiles(project_dir, input_files), operation, key_columns, for_any)
-    saveFile(result, output_file)
+    #saveFile(result, output_file)
 
-    #print(result)
-    #print(len(result))
+    print(result)
+    print(len(result))
