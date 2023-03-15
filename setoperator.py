@@ -1,0 +1,61 @@
+import pandas as pd
+
+
+class PandasOperator():
+    """
+    ex)
+    pdOperator = PandasOperator()
+    pdOperator.union([df1, df2, df3], key_columns=[col1, col2], for_any=True)
+    > union_dataframe
+    """
+    def __init__(self):
+        pass
+    
+    def intersection(self, df_list:list, key_columns: list, for_any: bool):
+        result_df = df_list[0]
+        for sub_df in df_list[1:]:
+            # 하나의 key_column 값이라도 일치
+            if for_any:
+                for key_column in key_columns:
+                    if key_column == key_columns[0]:
+                        result_df = result_df[result_df[key_column].isin(set(result_df[key_column])&set(sub_df[key_column]))]
+                    else:
+                        result_df = pd.concat([result_df, result_df[result_df[key_column].isin(set(result_df[key_column])&set(sub_df[key_column]))]]).drop_duplicates()
+            # 모든 key_column 값이 일치
+            else:
+                for key_column in key_columns:
+                    result_df = result_df[result_df[key_column].isin(set(result_df[key_column])&set(sub_df[key_column]))]
+                    sub_df = sub_df[sub_df[key_column].isin(set(result_df[key_column])&set(sub_df[key_column]))]
+        return result_df
+
+
+    def diff(self, df_list, key_columns, for_any):
+        result_df = df_list[0]
+        for sub_df in df_list[1:]:
+            # 하나의 key_column이라도 값이 일치하면 제외
+            if for_any:
+                for key_column in key_columns:
+                    result_df = result_df[result_df[key_column].isin(set(result_df[key_column])-set(sub_df[key_column]))]
+                    sub_df = sub_df[sub_df[key_column].isin(set(sub_df[key_column])-set(result_df[key_column]))]
+            # key_column 값이 전부 같은 경우 제외
+            else:
+                for key_column in key_columns:
+                    if key_column == key_columns[0]:
+                        result_df = result_df[result_df[key_column].isin(set(result_df[key_column])-set(sub_df[key_column]))]
+                    else:
+                        result_df = pd.concat([result_df, result_df[result_df[key_column].isin(set(result_df[key_column])-set(sub_df[key_column]))]]).drop_duplicates()
+        return result_df        
+
+
+    def union(self, df_list, key_columns, for_any):
+        result_df = df_list[0]
+        for sub_df in df_list[1:]:
+            result_df = pd.concat([result_df, sub_df])
+            # key_column 값이 하나라도 같으면 중복 제거
+            if for_any:
+                for key_column in key_columns:
+                    result_df = result_df.drop_duplicates(subset=[key_column])
+            # key_column 값이 전부 같은 경우 중복 제거
+            else:
+                result_df = result_df.drop_duplicates(subset=key_columns)                
+        return result_df
