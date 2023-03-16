@@ -24,7 +24,7 @@ def getargs():
 
 
 
-def readdf(input_path:str) -> object:    # 인자로 dftype 추가
+def readdf(input_path:str) -> object: # 인자로 dftype 추가
         file_extension = input_path.split('.')[-1]
         # excel to df
         if file_extension == 'xlsx':
@@ -43,16 +43,20 @@ def readdf(input_path:str) -> object:    # 인자로 dftype 추가
 
 
 
-def savedf(df:object, output_file:str):
+def savedf(df:object, output_file:str): # 인자로 dftype 추가
     file_extension = output_file.split('.')[-1]
+    # df to excel
     if file_extension == 'xlsx':
         df.to_excel(output_file, index=False)
+    # df to csv
     elif file_extension == 'csv':
         df.to_csv(output_file, index=False)
+    # df to tsv
     elif file_extension == 'tsv':
         df.to_csv(output_file, sep='\t', index=False)
+    # df to jsonl
     elif file_extension == 'jsonl':
-        df.to_json(output_file, orient='records', lines=True)
+        df.to_json(output_file, orient='records', lines=True, force_ascii=False)
     else:
         raise Exception("지원하지 않는 파일 포맷")
 
@@ -72,7 +76,7 @@ class PandasOperator():
         self.key_columns = key_columns
         self.for_any = for_any
 
-    def __call__(self, operation):
+    def __call__(self, operation:str):
         if operation == 'intersection':
             return self._intersection()
         elif operation == 'diff':
@@ -90,17 +94,12 @@ class PandasOperator():
             # 하나의 key_column 값이라도 일치
             if self.for_any:
                 for key_column in self.key_columns:
-                    # if key_column == self.key_columns[0]:
-                    #     result_df = result_df[result_df[key_column].isin(set(result_df[key_column])&set(sub_df[key_column]))]
-                    # else:
-                    #     result_df = pd.concat([result_df, temp_df[temp_df[key_column].isin(set(sub_df[key_column])&set(temp_df[key_column]))]]).drop_duplicates()
                     if key_column == self.key_columns[0]:
                         result_df = result_df[result_df[key_column].isin(set(sub_df[key_column]))]
                     else:
                         result_df = pd.concat([result_df, temp_df[temp_df[key_column].isin(set(sub_df[key_column]))]]).drop_duplicates()
             # 모든 key_column 값이 일치
             else:
-                #result_df = pd.merge(result_df, sub_df, on=self.key_columns, how='inner')
                 set_of_key_columns = set(sub_df[self.key_columns].apply(lambda x: tuple(x), axis=1))
                 result_df = result_df[result_df[self.key_columns].apply(lambda x: tuple(x), axis=1).isin(set_of_key_columns)]
         return result_df
@@ -109,17 +108,13 @@ class PandasOperator():
     def _diff(self):
         result_df = self.main_df
         for input in self.input_list[1:]:
-            temp_df = result_df.copy()
             sub_df = readdf(input_path=f'{self.project_dir}/{input}')[self.key_columns]
             # key_column 값이 하나라도 일치하면 제외
             if self.for_any:
                 for key_column in self.key_columns:
                     result_df = result_df[~result_df[key_column].isin(set(sub_df[key_column]))]
-                    #sub_df = sub_df[~sub_df[key_column].isin(set(result_df[key_column]))]
             # key_column 값이 전부 같은 경우 제외
             else:
-                # result_df = pd.merge(result_df, sub_df, on=self.key_columns, how='left', indicator=True)
-                # result_df = result_df[result_df['_merge']=='left_only'].drop(columns='_merge')
                 set_of_key_columns = set(sub_df[self.key_columns].apply(lambda x: tuple(x), axis=1))
                 result_df = result_df[~result_df[self.key_columns].apply(lambda x: tuple(x), axis=1).isin(set_of_key_columns)]
         return result_df        
@@ -142,8 +137,10 @@ class PandasOperator():
         return result_df[self.main_df.columns]
     
 
+
 class DaskOperator():
     pass
+
 
 
 class PolarsOperator():
