@@ -18,7 +18,7 @@
    4. excel 외의 파일 포맷에 대한 처리
    5. 기존 pandas로 구현한 기능 dask, ploars로 대체
 * 2개의 데이터프레임에 대해 각 intersection, diff, union 연산 수행 구현
-    * intersection(교집합)
+    <!-- * intersection(교집합)
         - 하나 이상의 key column 조건 만족
             ~~~python
             for key_column in key_columns:
@@ -53,7 +53,7 @@
                     diff_df = df1[df1[key_column].isin(df1_set-df2_set)]
                 else:
                     diff_df = pd.concat([diff_df, df1[df1[key_column].isin(df1_set-df2_set)]]).drop_duplicates()
-            ~~~
+            ~~~ -->
     * union(합집합)
         - 하나 이상의 key column 조건 만족
             ~~~python
@@ -109,3 +109,41 @@
     * dataframe 연산 방식에 대해 좀 더 고민해보기
 
 ---
+
+## 2023.03.16
+* A파일과 B파일의 column이 다른 경우 처리
+    * 결과 파일의 column은 A파일과 같게
+    * union 연산에서 B파일에 A파일의 일부 column이 없을 때 -> 해당 column의 값 비워두기
+    * **key column이 존재하지 않는 경우** 어떻게 처리할 지 문제
+* (기존 방식)모든 파일을 데이터프레임 형태로 읽어온 후 연산 
+    * 연산 시 차례대로 하나씩 불러오는 방식으로 변경
+    * 실행 스크립트가 아닌 모듈 내부에서 readdf함수 호출
+* union 연산
+    * 기준 dataframe에서 key_column값이 중복되는 경우가 있을 수 있어, drop_duplicates 사용 어려움
+    * for_any_key_columns O : key_column 값이 하나라도 일치하면 결과값에서 제거
+    * for_any_key_columns X : key_column 값이 전부 일치하면 결과값에서 제거
+* xlsx 외의 포맷에 대해 테스트 (정상 동작 확인)
+    * sample file 만들기
+        - csv
+            ~~~python
+            import csv
+            def save_csv(file_name, data):
+                with open(file_name, 'w', newline='') as file:
+                    writer = csv.writer(file)
+                    writer.writerows(data)
+            ~~~
+        - tsv
+            - csv에서 writer의 인자로 delemiter='\t'만 추가
+        - jsonl
+            ~~~~python
+            import json
+            def save_jsonl(file_name, data):
+            with open(file_name, 'w', encoding='utf-8') as file:
+                for json_obj in data:
+                    file.write(json.dumps(json_obj) + '\n')
+            ~~~~
+* getargs, readdf, savedf 함수 위치 조정
+* 내일 할 일
+    * 지금까지의 진행 내용 정리 후 리뷰
+    * key_column이 존재하지 않는 파일 입력받은 경우 처리 방법 고민
+    * DASK, polars 공부
