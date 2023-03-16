@@ -32,30 +32,22 @@ def main(df_list:list[object], operation:str, key_columns:list[str], for_any:boo
 
 def readFiles(project_dir:str, input_files:list[str]) -> list[object]:    
     df_list = []
+
     for file in input_files:
         input_path = project_dir + '/' + file
+        file_extension = file.split('.')[-1]
         # excel to df
-        if file.split('.')[-1] == 'xlsx':
+        if file_extension == 'xlsx':
             df_list.append(pd.read_excel(input_path))
         # csv to df
-        elif file.split('.')[-1] == 'csv':
+        elif file_extension == 'csv':
             df_list.append(pd.read_csv(input_path))
         # tsv to df
-        elif file.split('.')[-1] == 'tsv':
+        elif file_extension == 'tsv':
             df_list.append(pd.read_csv(input_path, sep='\t'))
         # jsonl to df
-        elif file.split('.')[-1] == 'jsonl':
-            json_list = []
-            with open(input_path, 'r', encoding='utf-8') as f:
-                for line in f:
-                    json_list.append(json.loads(line.rstrip('\n|\r')))
-            df_cols = json_list[0].keys()
-            df_data = []
-            for d in json_list:
-                df_data.append([])
-                for col in df_cols:
-                    df_data[-1].append(d.get(col))
-            df_list.append(pd.DataFrame(df_data, columns=df_cols))
+        elif file_extension == 'jsonl':
+            df_list.append(pd.read_json(input_path, lines=True))
         else:
             raise Exception("지원하지 않는 파일 포맷")
     return df_list
@@ -66,11 +58,11 @@ def saveFile(df:object, output_file:str):
     if file_extension == 'xlsx':
         df.to_excel(output_file, index=False)
     elif file_extension == 'csv':
-        pass
+        df.to_csv(output_file, index=False)
     elif file_extension == 'tsv':
-        pass
+        df.to_csv(output_file, sep='\t', index=False)
     elif file_extension == 'jsonl':
-        pass
+        df.to_json(output_file, orient='records', lines=True)
     else:
         raise Exception("지원하지 않는 파일 포맷")
 
