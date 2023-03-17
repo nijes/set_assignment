@@ -1,6 +1,8 @@
 # Set Assignment
 > 2 이상의 파일(xlsx, csv, tsv, jsonl 등)에서 지정한 key column을 기준으로 set operations(diff, intersection, union)을 하는 프로그램 작성
 
+<br>
+
 ---
 
 ## 2023.03.13
@@ -147,3 +149,23 @@
     * 지금까지의 진행 내용 정리 후 리뷰
     * key_column이 존재하지 않는 파일 입력받은 경우 처리 방법 고민
     * DASK, polars 공부
+
+---
+
+## 2023.03.17
+* [진행상황 정리](https://nifty-aftershave-2ff.notion.site/set-operations-baef0e0acb03448aa8ef363c4d23b5cf) 후 발표
+    * 함수명, 변수명은 해당 기능 반영하도록
+    * 연산 시 결과로 컬럼 조건을 우선 얻은 후 최종적으로 해당 조건이 반영된 결과 데이터프레임이 출력되는 방식
+    * 각 연산에서 공통되는 부분(ex.교집합) 따로 정의 후 이를 재활용하는 방식
+    * 파일 입출력 등 타기능을 수행하는 부분은 다른 파일로 분리
+    * 부모 클래스 정의한 다음 이를 상속하여 각 프레임워크별 클래스에서 정의하는 방식으로 추상화
+* 기존 모듈 파일 분리
+    ~~~
+    setoperator
+     |--  __init__.py
+     |--  utils.py
+     |--  dataio.py
+     `--  setoperator.py
+    ~~~
+* polars 기본 기능 적용 중
+    * 파일 입출력, 데이터프레임 프레임워크 변경, 특정 column값 추출 등
