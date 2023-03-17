@@ -127,14 +127,13 @@ class PandasOperator():
             # sub_df 데이터 중 key_column 값이 하나라도 일치하면 제외
             if self.for_any:
                 for key_column in self.key_columns:
-                    sub_df = sub_df[~sub_df[key_column].isin(set(result_df[key_column]))]
-                    result_df = pd.concat([result_df, sub_df])        
+                    sub_df = sub_df[~sub_df[key_column].isin(set(result_df[key_column]))]      
             # sub_df 데이터 중 key_column 값이 전부 일치하면 제외
             else:
                 set_of_key_columns = set(result_df[self.key_columns].apply(lambda x: tuple(x), axis=1))
                 sub_df = sub_df[~sub_df[self.key_columns].apply(lambda x: tuple(x), axis=1).isin(set_of_key_columns)]
-                result_df = pd.concat([result_df, sub_df])                                
-        return result_df[self.main_df.columns]
+            result_df = pd.concat([result_df, sub_df])[self.main_df.columns]                                
+        return result_df
     
 
 
