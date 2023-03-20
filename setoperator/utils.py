@@ -15,6 +15,10 @@ def getargs():
     parser.add_argument("--key_columns", dest="key_columns", nargs="+", action="store", required=True)
     parser.add_argument("--for_any_key_columns", dest="for_any", action="store_true", required=False, default=False)
     
+    parser.add_argument("--pandas", dest="framework", action="store_const", const="pandas", required=False, default="pandas")
+    parser.add_argument("--polars", dest="framework", action="store_const", const="polars", required=False, default="pandas")
+    parser.add_argument("--dask", dest="framework", action="store_const", const="dask", required=False, default="pandas")
+
     args = parser.parse_args()
 
-    return args.path, args.input_files, args.output_file, args.operation, args.key_columns, args.for_any
+    return args.path, args.input_files, args.output_file, args.operation, args.key_columns, args.for_any, args.framework
