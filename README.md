@@ -169,3 +169,46 @@
     ~~~
 * polars 기본 기능 적용 중
     * 파일 입출력, 데이터프레임 프레임워크 변경, 특정 column값 추출 등
+
+---
+
+## 2023.03.20
+* 모든 조건을 정리한 후 eval()함수로 전체 조건 한 번에 적용 => 적용 X
+    ~~~python
+    condition_list = []
+    for input in self.input_list[1:]:
+        sub_df = f'readdf("{self.path}/{input}")[{self.key_columns}]'
+        for key_column in self.key_columns:
+            column_condition = f'main_df["{key_column}"].isin(set({sub_df}["{key_column}"]))'
+            condition_list.append(column_condition)
+    
+    result_df = main_df[eval('|'.join(condition_list))]
+    ~~~
+    * 시간 증가 
+        - intersection, key_columns(group_id, en_id), for_any_key_columns : 8.87s -> 14.47s
+* 각 key_column 조건에 대해 reduce함수 적용하여 조건 생성 => 적용 O
+    ~~~python
+    condition_list = []
+    for key_column in self.key_columns:
+        condition_list.append(main_df[key_column].isin(set(sub_df[key_column])))
+    
+    if self.for_any: condition = reduce(lambda x, y: x | y, condition_list)
+    else: condition = reduce(lambda x, y: x & y, condition_list)
+    ~~~
+    * 각 operation 메서드에서 해당 조건 호출하여 필터링 진행
+        ~~~python
+        # intersection
+        result_df = result_df[self._intersection_condition(result_df, sub_df)]
+        # diff
+        esult_df = result_df[~self._intersection_condition(result_df, sub_df)]
+        # union
+        sub_df = sub_df[~self._intersection_condition(sub_df, result_df)]        
+        result_df = pd.concat([result_df, sub_df])
+        ~~~
+* polars
+    * 기존 pandas 코드에서 문법 수정
+* dask
+    * pandas 코드 그대로 적용 가능
+    * excel, json 지원 X -> pandas dataframe을 변환하는 방식으로
+    * 병렬처리가 특장점인 만큼 해당 내용 활용가능하도록 코드 수정 필요
+        - npartitions(파티션 수), num_workers(멀티프로세싱에 사용하는 코어 수) 지정
