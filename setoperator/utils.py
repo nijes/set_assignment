@@ -22,3 +22,9 @@ def getargs():
     args = parser.parse_args()
 
     return args.path, args.input_files, args.output_file, args.operation, args.key_columns, args.for_any, args.framework
+
+
+def add_col_func(df, key_columns):
+    for key_column in key_columns:
+        if key_column not in df.columns:
+            df[key_column] = ''
