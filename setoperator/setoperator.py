@@ -1,8 +1,10 @@
 import pandas as pd
 import polars as pl
 import dask.dataframe as dd
+import dask.delayed
 from .dataio import readdf
 from functools import reduce
+
 
 
 class SetOperator:
@@ -20,22 +22,22 @@ class SetOperator:
 
 
 
+
 class PandasOperator(SetOperator):
     def __init__(self, path:str, input_list:list[str], key_columns:list[str], for_any:bool):
         super().__init__(path, input_list, key_columns, for_any)
         self.dftype = 'pandas'
-
+        #self.main_df = readdf(f'{self.path}/{self.input_list[0]}', self.dftype)        
+        #self.main_df_cols = [col for col in self.main_df.columns]
 
     def _intersection_condition(self, main_df:object, sub_df:object) -> object:
-        condition_list = []
-        for key_column in self.key_columns:
-            condition_list.append(main_df[key_column].isin(set(sub_df[key_column])))
+        condition_list =  [main_df[key_column].isin(set(sub_df[key_column])) for key_column in self.key_columns]
         
         if self.for_any:
             condition = reduce(lambda x, y: x | y, condition_list)
         else:
             condition = reduce(lambda x, y: x & y, condition_list)
-
+        
         return condition
         
 
@@ -45,7 +47,7 @@ class PandasOperator(SetOperator):
         for input in self.input_list[1:]:
             sub_df = readdf(f'{self.path}/{input}', self.dftype)
             result_df = result_df[self._intersection_condition(result_df, sub_df)]
-
+        
         return result_df
 
 
@@ -61,11 +63,12 @@ class PandasOperator(SetOperator):
 
     def _union(self) -> object:
         result_df = readdf(f'{self.path}/{self.input_list[0]}', self.dftype)
+        result_df_cols = result_df.columns
 
         for input in self.input_list[1:]:
             sub_df = readdf(f'{self.path}/{input}', self.dftype)
             sub_df = sub_df[~self._intersection_condition(sub_df, result_df)]        
-            result_df = pd.concat([result_df, sub_df])[result_df.columns]
+            result_df = pd.concat([result_df, sub_df])[result_df_cols]
 
         return result_df
     
@@ -124,25 +127,31 @@ class PolarsOperator(SetOperator):
     
 
 
+
 class DaskOperator(SetOperator):
     def __init__(self, path:str, input_list:list[str], key_columns:list[str], for_any:bool):
         super().__init__(path, input_list, key_columns, for_any)
         self.dftype = 'dask'
-        # npartitions(파티션 수), num_workers(멀티프로세싱에 사용하는 코어 수) 입력 받기
 
+    def __call__(self, operation:str):
+        if operation == 'intersection': 
+            return dask.delayed(self._intersection())
+        elif operation == 'diff': return self._diff()
+        elif operation == 'union': return self._union()
+        else: raise SyntaxError
+
+    
     def _intersection_condition(self, main_df:object, sub_df:object) -> object:
-        condition_list = []
-        for key_column in self.key_columns:
-            condition_list.append(main_df[key_column].isin(set(sub_df[key_column])))
-        
+        condition_list =  [main_df[key_column].isin(set(sub_df[key_column])) for key_column in self.key_columns]
+
         if self.for_any:
             condition = reduce(lambda x, y: x | y, condition_list)
         else:
             condition = reduce(lambda x, y: x & y, condition_list)
 
         return condition
-
-
+    
+    @dask.delayed
     def _intersection(self) -> object:
         result_df = readdf(f'{self.path}/{self.input_list[0]}', self.dftype)
 
@@ -150,9 +159,9 @@ class DaskOperator(SetOperator):
             sub_df = readdf(f'{self.path}/{input}', self.dftype)
             result_df = result_df[self._intersection_condition(result_df, sub_df)]
 
-        return result_df
+        return result_df.compute()
 
-
+    @dask.delayed
     def _diff(self) -> object:
         result_df = readdf(f'{self.path}/{self.input_list[0]}', self.dftype)
 
@@ -160,15 +169,15 @@ class DaskOperator(SetOperator):
             sub_df = readdf(f'{self.path}/{input}', self.dftype)
             result_df = result_df[~self._intersection_condition(result_df, sub_df)]
         
-        return result_df       
+        return result_df.compute()       
 
-
+    @dask.delayed
     def _union(self) -> object:
         result_df = readdf(f'{self.path}/{self.input_list[0]}', self.dftype)
 
         for input in self.input_list[1:]:
             sub_df = readdf(f'{self.path}/{input}', self.dftype)
-            sub_df = sub_df[~self._intersection_condition(sub_df, result_df)]        
-            result_df = pd.concat([result_df, sub_df])[result_df.columns]
+            sub_df = sub_df[~self._intersection_condition(sub_df, result_df)]    
+            result_df = dd.concat([result_df, sub_df], axis=0)[result_df.columns]
 
-        return result_df
+        return result_df.compute()
