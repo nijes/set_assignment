@@ -230,3 +230,16 @@
 * 세미나 관련 내용 정리 중
 
 ---
+
+## 2023.03.22
+* 진행 내용 정리 중
+    * [노션 페이지](https://nifty-aftershave-2ff.notion.site/set-operations-baef0e0acb03448aa8ef363c4d23b5cf)
+* dask로 병렬 처리 시 속도 저하 문제
+    * 데이터셋 크기가 작은 경우 pandas보다 속도 빠름
+    * 데이터셋 크기가 커질 경우 
+        - isin 메서드 연산과정에서 전체 데이터프레임이 다수의 파티션으로 분할되어 모든 분할된 데이터셋을 검색하여 비효율적
+* modin
+    * 엑셀파일 지원x(pandas dataframe 으로 읽은 후 변환)
+    * 내일 더 공부해 볼 계획
+
+---
