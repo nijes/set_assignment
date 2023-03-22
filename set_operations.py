@@ -1,5 +1,7 @@
 from setoperator import getargs, savedf, PandasOperator, PolarsOperator, DaskOperator
 from time import time
+#from dask.distributed import Client, progress, LocalCluster
+import dask
 
 def operationResult(path:str, input_list:list[str], operation:str, key_columns:list[str], for_any:bool, dftype:str) -> object:
 
@@ -8,8 +10,10 @@ def operationResult(path:str, input_list:list[str], operation:str, key_columns:l
     elif dftype == 'polars':
         operator = PolarsOperator(path, input_list, key_columns, for_any)
     elif dftype == 'dask':
+        #client = Client(n_workers=8, threads_per_worker=2, memory_limit = '16GB')
+        dask.config.set(scheduler='threads', num_workers=8)
         operator = DaskOperator(path, input_list, key_columns, for_any)
-
+        
     result_df = operator(operation)
 
     return result_df
@@ -17,14 +21,15 @@ def operationResult(path:str, input_list:list[str], operation:str, key_columns:l
 
 if __name__ == "__main__":
     start = time()
-    
+    #client = Client()
+
     path, input_files, output_file, operation, key_columns, for_any, dftype = getargs()  
+    
     result_df = operationResult(path, input_files, operation, key_columns, for_any, dftype)
-    
+
     output_path = f'{path}/{output_file}'
+    
+    #print(time()-start, 'start saving...')
     savedf(result_df, output_path, dftype)
-    
     print(time()-start, 'sec')
-    
-    #print(len(result_df))
-    #print(result_df.head())
+
