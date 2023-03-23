@@ -236,10 +236,36 @@
     * [노션 페이지](https://nifty-aftershave-2ff.notion.site/set-operations-baef0e0acb03448aa8ef363c4d23b5cf)
 * dask로 병렬 처리 시 속도 저하 문제
     * 데이터셋 크기가 작은 경우 pandas보다 속도 빠름
-    * 데이터셋 크기가 커질 경우 
-        - isin 메서드 연산과정에서 전체 데이터프레임이 다수의 파티션으로 분할되어 모든 분할된 데이터셋을 검색하여 비효율적
+    * isin 메서드를 호출할 때 Dask는 모든 분할된 데이터셋을 검색 -> 작은 데이터셋을 각각 처리한 다음 결과를 병합해야 하므로 이러한 분산처리 오버헤드 때문에 처리 속도 저하
+
 * modin
     * 엑셀파일 지원x(pandas dataframe 으로 읽은 후 변환)
     * 내일 더 공부해 볼 계획
+    * 파일 용량 클 경우 병렬 처리 시 속도 저하 이슈
+
+---
+
+## 2023.03.23
+* Dask 파티셔닝
+    * 파티션은 데이터를 분할하여 여러 작업자(worker)에게 분산하고 병렬 처리를 수행할 수 있도록 해줌 (Dask는 작업을 수행할 때 파티션 단위로 분산 처리 -> 파티션이 더 많을수록 더 많은 작업자가 병렬로 처리)
+* pandas(numpy) vs polars(arrow)
+    * pandas 2.0부터 pyarrow backend로 사용
+* 기타 참고 라이브러리
+    * Modin, Vaex, cudf, Koalas, swifter 등
+    * pandas dataframe + pandas 일부 기능 보완하는 방식으로 주로 사용됨
+
+* duckdb Operator 만들어 봄
+    * duckdb? 
+        * 대규모 데이터 분석을 위한 오픈소스 인메모리 SQL OLAP DBMS
+        * SQLite처럼 한 개의 파일에 DB저장
+    * 설치
+        ~~~bash
+        pip install duckdb
+        ~~~
+    * 실행 시 dataframe framework 선택 인자값으로 --duckdb입력하면 실행 됨
+        * 연산 부분만 쿼리로 실행하도록 변경, 파일입출력은 polars 이용하도록
+        * 현재 쿼리를 한 번에 실행시키는 방식이 아닌, input파일마다 결과 데이터프레임 출력하고 다시 쿼리 날리는 방식
+        * 파일 입출력(csv, json 지원O / excel 지원X)
+    * 실행 속도 가장 빠름
 
 ---
