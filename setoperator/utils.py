@@ -18,6 +18,7 @@ def getargs():
     parser.add_argument("--pandas", dest="framework", action="store_const", const="pandas", required=False, default="pandas")
     parser.add_argument("--polars", dest="framework", action="store_const", const="polars", required=False, default="pandas")
     parser.add_argument("--dask", dest="framework", action="store_const", const="dask", required=False, default="pandas")
+    parser.add_argument("--duckdb", dest="framework", action="store_const", const="duckdb", required=False, default="pandas")
 
     args = parser.parse_args()
 
