@@ -247,7 +247,8 @@
 
 ## 2023.03.23
 * Dask 파티셔닝
-    * 파티션은 데이터를 분할하여 여러 작업자(worker)에게 분산하고 병렬 처리를 수행할 수 있도록 해줌 (Dask는 작업을 수행할 때 파티션 단위로 분산 처리 -> 파티션이 더 많을수록 더 많은 작업자가 병렬로 처리)
+    * 파티션은 데이터를 분할하여 여러 작업자(worker)에게 분산하고 병렬 처리를 수행할 수 있도록 해줌 
+    * Dask는 작업을 수행할 때 파티션 단위로 분산 처리 -> 파티션이 더 많을수록 더 많은 작업자가 병렬로 처리)
 * pandas(numpy) vs polars(arrow)
     * pandas 2.0부터 pyarrow backend로 사용
 * 기타 참고 라이브러리
@@ -262,10 +263,23 @@
         ~~~bash
         pip install duckdb
         ~~~
-    * 실행 시 dataframe framework 선택 인자값으로 --duckdb입력하면 실행 됨
+    * 실행 시 dataframe framework 선택 인자값으로 --duckdb 입력하면 실행 됨
         * 연산 부분만 쿼리로 실행하도록 변경, 파일입출력은 polars 이용하도록
         * 현재 쿼리를 한 번에 실행시키는 방식이 아닌, input파일마다 결과 데이터프레임 출력하고 다시 쿼리 날리는 방식
         * 파일 입출력(csv, json 지원O / excel 지원X)
     * 실행 속도 가장 빠름
+
+---
+
+## 2023.03.24
+* duckdb operator 파일 입출력 기능 추가
+    * 파일 입력
+        * read excel 지원 X -> pandas.read_excel() 사용
+    * 파일 출력
+        * relation에서 바로 csv, parquet 파일로 변환 가능 (json, xslx는 지원X)
+        * 결과 pandas df, polar df, arrow table, numpy array로 변환 가능 -> pandas df로 변환 후 저장
+* 정리 내용 발표
+    * [노션 페이지](https://nifty-aftershave-2ff.notion.site/set-operations-baef0e0acb03448aa8ef363c4d23b5cf)
+* black formatter 적용
 
 ---
