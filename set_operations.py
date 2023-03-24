@@ -21,7 +21,7 @@ def operationResult(path:str, input_list:list[str], operation:str, key_columns:l
 
 
 if __name__ == "__main__":
-    
+
     start = time()
 
     args = getargs()
