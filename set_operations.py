@@ -16,7 +16,6 @@ def operationResult(path:str, input_list:list[str], operation:str, key_columns:l
         operator = DuckdbOperator(path, input_list, key_columns, for_any)
         
     result_df = operator(operation)
-
     return result_df
 
 
