@@ -4,55 +4,56 @@ import dask.dataframe as dd
 import duckdb
 
 
-def readdf(input_path: str, dftype: str) -> object:
-    file_extension = input_path.split(".")[-1]
-
-    if dftype == "polars":
-        if file_extension == "xlsx":
-            return pl.read_excel(input_path)
-        elif file_extension == "csv":
-            return pl.read_csv(input_path)
-        elif file_extension == "tsv":
-            return pl.read_csv(input_path, sep="\t")
-        elif file_extension == "jsonl":
-            return pl.read_ndjson(input_path)
-        else:
-            raise Exception("지원하지 않는 파일 포맷")
-    elif dftype == "dask":
-        if file_extension == "xlsx":
-            return dd.from_pandas(pd.read_excel(input_path), npartitions=8)
-        elif file_extension == "csv":
-            return dd.read_csv(input_path)
-        elif file_extension == "tsv":
-            return dd.read_csv(input_path, sep="\t")
-        elif file_extension == "jsonl":
-            return dd.read_json(input_path, lines=True)
-        else:
-            raise Exception("지원하지 않는 파일 포맷")
-    elif dftype == "pandas":
-        if file_extension == "xlsx":
-            return pd.read_excel(input_path)
-        elif file_extension == "csv":
-            return pd.read_csv(input_path)
-        elif file_extension == "tsv":
-            return pd.read_csv(input_path, sep="\t")
-        elif file_extension == "jsonl":
-            return pd.read_json(input_path, lines=True)
-        else:
-            raise Exception("지원하지 않는 파일 포맷")
-    elif dftype == "duckdb":
-        if file_extension == "xlsx":
-            return pd.read_excel(input_path)
-        elif file_extension == "csv":
-            return duckdb.read_csv(input_path)
-        elif file_extension == "tsv":
-            return duckdb.read_csv(input_path, sep="\t")
-        elif file_extension == "jsonl":
-            return duckdb.read_json(input_path)
-        else:
-            raise Exception("지원하지 않는 파일 포맷")
-    else:
-        raise Exception
+def readdfs(path: str, input_files: list[str], dftype:str) -> list[object]:
+    df_list = []
+    for file in input_files:
+        file_extension = file.split(".")[-1]
+        file_path = f'{path}/{file}'
+        if dftype == "polars":
+            if file_extension == "xlsx":
+                df_list.append(pl.read_excel(file_path))
+            elif file_extension == "csv":
+                df_list.append(pl.read_csv(file_path))
+            elif file_extension == "tsv":
+                df_list.append(pl.read_csv(file_path, sep="\t"))
+            elif file_extension == "jsonl":
+                df_list.append(pl.read_ndjson(file_path))
+            else:
+                raise Exception("지원하지 않는 파일 포맷")
+        elif dftype == "dask":
+            if file_extension == "xlsx":
+                df_list.append(dd.from_pandas(pd.read_excel(file_path), npartitions=8))
+            elif file_extension == "csv":
+                df_list.append(dd.read_csv(file_path))
+            elif file_extension == "tsv":
+                df_list.append(dd.read_csv(file_path, sep="\t"))
+            elif file_extension == "jsonl":
+                df_list.append(dd.read_json(file_path, lines=True))
+            else:
+                raise Exception("지원하지 않는 파일 포맷")
+        elif dftype == "pandas":
+            if file_extension == "xlsx":
+                df_list.append(pd.read_excel(file_path))
+            elif file_extension == "csv":
+                df_list.append(pd.read_csv(file_path))
+            elif file_extension == "tsv":
+                df_list.append(pd.read_csv(file_path, sep="\t"))
+            elif file_extension == "jsonl":
+                df_list.append(pd.read_json(file_path, lines=True))
+            else:
+                raise Exception("지원하지 않는 파일 포맷")
+        elif dftype == "duckdb":
+            if file_extension == "xlsx":
+                df_list.append(pd.read_excel(file_path))
+            elif file_extension == "csv":
+                df_list.append(duckdb.read_csv(file_path))
+            elif file_extension == "tsv":
+                df_list.append(duckdb.read_csv(file_path, sep="\t"))
+            elif file_extension == "jsonl":
+                df_list.append(duckdb.read_json(file_path))
+            else:
+                raise Exception("지원하지 않는 파일 포맷")
+    return df_list
 
 
 def savedf(df: object, output_path: str, dftype: str):
