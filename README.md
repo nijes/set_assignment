@@ -283,3 +283,15 @@
 * black formatter 적용
 
 ---
+
+## 2023.03.28
+* 각 Operator class에서 intersection 조건 1차원 리스트로 만드는 메서드 parent class로 이동
+* Operator class 인자
+    * path 제거
+    * input_list[파일 이름]에서 df_list[데이터프레임]으로 변경
+* 스크립트 실행 시 dataframe type argument 입력 방식 변경
+    ~~~bash
+    --dftype pandas
+    ~~~
+    - 입력 가능한 값 : [pandas, polars, dask, duckdb]
+---
